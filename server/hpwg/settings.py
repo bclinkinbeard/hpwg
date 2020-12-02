@@ -25,7 +25,7 @@ SECRET_KEY = 'b+^nhlh@r*-n-p5w3fx5j-*9mn#@7plku=u*wg-jf%5*c61vf^'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['hpwg-297320.uc.r.appspot.com']
+ALLOWED_HOSTS = ['hpwg-297320.uc.r.appspot.com', '127.0.0.1', 'localhost']
 
 
 # Application definition
