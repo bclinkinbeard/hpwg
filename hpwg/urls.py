@@ -22,6 +22,6 @@ def client(request):
 
 urlpatterns = [
     path('', client),
-    path('api/', include('web_server.urls')),
+    path('api/', include('api_server.urls')),
     path('admin/', admin.site.urls),
 ]
