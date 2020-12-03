@@ -5,6 +5,6 @@ from django.urls import include, path
 from . import views
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('ny-taxi-tables/', views.ny_taxi_tables, name='ny_taxi_tables'),
     path('arrow/', views.arrow, name='arrow'),
 ]
