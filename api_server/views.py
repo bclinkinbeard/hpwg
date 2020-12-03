@@ -1,3 +1,5 @@
+import datetime
+import decimal
 import json
 import pyarrow as pa
 from django.http import HttpResponse
@@ -15,6 +17,26 @@ def ny_taxi_tables(request):
       for key, val in row.items():
         if key == "table_name":
           tables.append(f"{val}")
+    tables.sort()
+    return HttpResponse(json.dumps(tables))
+
+def ny_taxi_table_sample(request, table_name):
+    dataset = "bigquery-public-data.new_york_taxi_trips"
+    query = f"SELECT * FROM {dataset}.{table_name} LIMIT 1000"
+
+    bq_client = bigquery.Client()
+    query_job = bq_client.query(query)
+    results = query_job.result()
+    tables = []
+    for row in results:
+      obj = {}
+      for key, val in row.items():
+        if isinstance(val, datetime.datetime) == False:
+          if isinstance(val, decimal.Decimal) == True:
+            obj[key] = float(val)
+          else:
+            obj[key] = val
+      tables.append(obj)
     return HttpResponse(json.dumps(tables))
 
 def arrow(request):

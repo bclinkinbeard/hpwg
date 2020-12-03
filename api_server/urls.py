@@ -6,5 +6,6 @@ from . import views
 
 urlpatterns = [
     path('ny-taxi-tables/', views.ny_taxi_tables, name='ny_taxi_tables'),
+    path('nytaxi/<str:table_name>/sample', views.ny_taxi_table_sample, name='ny_taxi_table_sample'),
     path('arrow/', views.arrow, name='arrow'),
 ]
