@@ -20,6 +20,34 @@ def ny_taxi_tables(request):
     tables.sort()
     return HttpResponse(json.dumps(tables))
 
+def nytaxi_trips(request):
+    dataset = "bigquery-public-data.new_york_taxi_trips"
+    query = f"""
+      SELECT
+      pickup_datetime, dropoff_datetime,
+      pickup_longitude, pickup_latitude,
+      dropoff_longitude, dropoff_latitude,
+      FROM `bigquery-public-data.new_york_taxi_trips.tlc_yellow_trips_2016`
+      WHERE pickup_latitude > 0
+      LIMIT 1000
+    """
+
+    bq_client = bigquery.Client()
+    query_job = bq_client.query(query)
+    results = query_job.result()
+    tables = []
+    for row in results:
+      obj = {}
+      for key, val in row.items():
+        v = val
+        if isinstance(val, decimal.Decimal) == True:
+          v = float(val)
+        if isinstance(val, datetime.datetime) == True:
+          v = val.isoformat()
+        obj[key] = v
+      tables.append(obj)
+    return HttpResponse(json.dumps(tables))
+
 def ny_taxi_table_sample(request, table_name):
     dataset = "bigquery-public-data.new_york_taxi_trips"
     query = f"SELECT * FROM {dataset}.{table_name} LIMIT 1000"
@@ -31,11 +59,12 @@ def ny_taxi_table_sample(request, table_name):
     for row in results:
       obj = {}
       for key, val in row.items():
-        if isinstance(val, datetime.datetime) == False:
-          if isinstance(val, decimal.Decimal) == True:
-            obj[key] = float(val)
-          else:
-            obj[key] = val
+        v = val
+        if isinstance(val, decimal.Decimal) == True:
+          v = float(val)
+        if isinstance(val, datetime.datetime) == True:
+          v = val.isoformat()
+        obj[key] = v
       tables.append(obj)
     return HttpResponse(json.dumps(tables))
 

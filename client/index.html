@@ -28,6 +28,7 @@
   <span id="output"></span>
   <div id="map"></div>
   <script>
+    /*
     const {DeckGL, ScatterplotLayer} = deck;
 
     const MALE_COLOR = [0, 128, 255];
@@ -54,24 +55,52 @@
         })
       ]
     });
+    /**/
   </script>
   <script>
     async function fetchData() {
-      const xhr = await fetch('/api/ny-taxi-tables')
+      const xhr = await fetch('/api/nytaxi/trips')
       const arr = await xhr.json()
-      console.log(arr);
-      const output = document.getElementById('output')
-      arr.forEach(tbl => {
-        const btn = document.createElement('button')
-        btn.textContent = tbl
-        btn.onclick = async () => {
-          const xhr = await fetch(`/api/nytaxi/${tbl}/sample`)
-          const arr = await xhr.json()
-          console.log(`1000 rows from ${tbl}`)
-          console.table(arr)
-        }
-        output.appendChild(btn)
-      })
+      // console.table(arr);
+      // const output = document.getElementById('output')
+      // arr.forEach(tbl => {
+      //   const btn = document.createElement('button')
+      //   btn.textContent = tbl
+      //   btn.onclick = async () => {
+      //     const xhr = await fetch(`/api/nytaxi/${tbl}/sample`)
+      //     const arr = await xhr.json()
+      //     console.log(`1000 rows from ${tbl}`)
+      //     console.table(arr)
+      //   }
+      //   output.appendChild(btn)
+      // })
+      const {DeckGL, ScatterplotLayer} = deck;
+
+      const MALE_COLOR = [0, 128, 255];
+      const FEMALE_COLOR = [255, 0, 128];
+
+      console.log(arr[0]);
+      new DeckGL({
+        container: 'map',
+        mapStyle: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+        initialViewState: {
+          longitude: -74,
+          latitude: 40.76,
+          zoom: 12,
+          maxZoom: 16
+        },
+        controller: true,
+        layers: [
+          new ScatterplotLayer({
+            id: 'scatter-plot',
+            data: arr,
+            radiusScale: 10,
+            radiusMinPixels: 1,
+            getPosition: d => [d.pickup_longitude, d.pickup_latitude, 0],
+            getFillColor: [255, 0, 255]
+          })
+        ]
+      });
     }
   </script>
 </body>
