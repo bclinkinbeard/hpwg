@@ -12,7 +12,7 @@ def movebank_wildebeest(request):
       SELECT
       individual_local_identifier, timestamp, location_long, location_lat,
       FROM {dataset}.{table}
-      LIMIT 1000
+      LIMIT 10000
     """
 
     bq_client = bigquery.Client()
