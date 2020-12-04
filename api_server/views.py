@@ -5,6 +5,32 @@ import pyarrow as pa
 from django.http import HttpResponse
 from google.cloud import bigquery
 
+def movebank_wildebeest(request):
+    dataset = "hpwg-297320.movebank"
+    table = "wildebeest"
+    query = f"""
+      SELECT
+      individual_local_identifier, timestamp, location_long, location_lat,
+      FROM {dataset}.{table}
+      LIMIT 1000
+    """
+
+    bq_client = bigquery.Client()
+    query_job = bq_client.query(query)
+    results = query_job.result()
+    tables = []
+    for row in results:
+      obj = {}
+      for key, val in row.items():
+        v = val
+        if isinstance(val, decimal.Decimal) == True:
+          v = float(val)
+        if isinstance(val, datetime.datetime) == True:
+          v = val.isoformat()
+        obj[key] = v
+      tables.append(obj)
+    return HttpResponse(json.dumps(tables))
+
 def ny_taxi_tables(request):
     dataset = "bigquery-public-data.new_york_taxi_trips"
     query = f"SELECT * FROM {dataset}.INFORMATION_SCHEMA.TABLES"
