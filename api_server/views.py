@@ -5,7 +5,16 @@ import pyarrow as pa
 from django.http import HttpResponse
 from google.cloud import bigquery
 
-def movebank_wildebeest(request):
+def arrow_table_to_pybytes(arrow_table):
+    sink = pa.BufferOutputStream()
+    writer = pa.ipc.new_stream(sink, arrow_table.schema)
+    for batch in arrow_table.to_batches():
+      writer.write_batch(batch)
+    writer.close()
+    buf = sink.getvalue()
+    return buf.to_pybytes()
+
+def get_wildebeest_query_job():
     dataset = "hpwg-297320.movebank"
     table = "wildebeest"
     query = f"""
@@ -16,7 +25,10 @@ def movebank_wildebeest(request):
     """
 
     bq_client = bigquery.Client()
-    query_job = bq_client.query(query)
+    return bq_client.query(query)
+
+def movebank_wildebeest(request):
+    query_job = get_wildebeest_query_job()
     results = query_job.result()
     tables = []
     for row in results:
@@ -30,6 +42,11 @@ def movebank_wildebeest(request):
         obj[key] = v
       tables.append(obj)
     return HttpResponse(json.dumps(tables))
+
+def movebank_wildebeest_arrow(request):
+    query_job = get_wildebeest_query_job()
+    buf = arrow_table_to_pybytes(query_job.to_arrow())
+    return HttpResponse(buf, content_type='application/octet-stream')
 
 def ny_taxi_tables(request):
     dataset = "bigquery-public-data.new_york_taxi_trips"

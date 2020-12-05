@@ -5,6 +5,8 @@ from django.urls import include, path
 from . import views
 
 urlpatterns = [
+    path('movebank/wildebeest/arrow', views.movebank_wildebeest_arrow,
+         name='movebank_wildebeest_arrow'),
     path('movebank/wildebeest/', views.movebank_wildebeest,
          name='movebank_wildebeest'),
 

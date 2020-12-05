@@ -13,7 +13,10 @@
     button {
       font-family: Arial, Helvetica, sans-serif;
       padding: 0.5rem;
+    }
+    .buttons {
       position: absolute;
+      z-index: 100;
     }
     #map {
       height: 100%;
@@ -23,9 +26,13 @@
   <script src='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
   <link href='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
   <script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>
+  <script src="https://unpkg.com/apache-arrow@2.0.0/Arrow.es5.min.js"></script>
 </head>
 <body>
-  <button onclick="fetchData()">Fetch Data</button>
+  <div class="buttons">
+    <button onclick="fetchData()">Fetch Data</button>
+    <button onclick="fetchArrowData()">Fetch Arrow Data</button>
+  </div>
   <div id="map"></div>
   <script src="/static/app.js"></script>
 </body>
