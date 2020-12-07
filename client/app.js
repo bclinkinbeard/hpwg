@@ -1,6 +1,10 @@
 const { DeckGL, ScatterplotLayer } = deck
 const dataset = 'movebank'
 
+function init() {
+  fetchData()
+}
+
 const fetchDatasetTables = async (dataset) => {
   const xhr = await fetch(`/api/dataset/${dataset}/`, {
     responseType: 'arraybuffer',
@@ -10,9 +14,9 @@ const fetchDatasetTables = async (dataset) => {
   console.log(table.getColumn('table_name').toArray());
 }
 
-fetchDatasetTables(dataset)
-
 const fetchData = async () => {
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('map').textContent = ''
   const animal = document.getElementById('animal').value
   const useArrow = document.getElementById('useArrow').checked
   const limit = document.getElementById('limit').value
@@ -26,6 +30,7 @@ const fetchData = async () => {
 const fetchJsonData = async (animal, limit) => {
   const xhr = await fetch(`/api/movebank/${animal}/json/${+limit}/`)
   const arr = await xhr.json()
+  document.getElementById('loading').style.display = 'none';
 
   let minLng, minLat, maxLng, maxLat
 
@@ -76,14 +81,19 @@ const fetchArrowData = async (animal, limit) => {
     responseType: 'arraybuffer',
   })
   const buf = await xhr.arrayBuffer()
+  document.getElementById('loading').style.display = 'none';
   const table = Arrow.Table.from(buf)
   const lngs = table.getColumn('location_long').toArray()
   const lats = table.getColumn('location_lat').toArray()
 
-  const minLng = Math.min(...lngs)
-  const maxLng = Math.max(...lngs)
-  const minLat = Math.min(...lats)
-  const maxLat = Math.max(...lats)
+  let minLng, minLat, maxLng, maxLat
+
+  for (let i = 0; i < lngs.length; i++) {
+    minLng = minLng ? Math.min(minLng, lngs[i]) : lngs[i]
+    maxLng = maxLng ? Math.max(maxLng, lngs[i]) : lngs[i]
+    minLat = minLat ? Math.min(minLat, lats[i]) : lats[i]
+    maxLat = maxLat ? Math.max(maxLat, lats[i]) : lats[i]
+  }
 
   const longitude = (minLng + maxLng) / 2
   const latitude = (minLat + maxLat) / 2
@@ -108,7 +118,11 @@ const fetchArrowData = async (animal, limit) => {
         radiusScale: 10,
         radiusMinPixels: 2,
         getPosition: (d, i) => [lngs[i.index], lats[i.index], 0],
-        getFillColor: [255, 40, 255],
+        getFillColor: (d, i) => {
+          const lngRatio = (lngs[i.index] - minLng) / (maxLng - minLng)
+          const latRatio = (lats[i.index] - minLat) / (maxLat - minLat)
+          return [255 * lngRatio, 40, 255 * (1 - latRatio)]
+        },
       }),
     ],
     getTooltip: ({ index }) => {
@@ -126,3 +140,5 @@ const fetchArrowData = async (animal, limit) => {
     },
   })
 }
+
+init()

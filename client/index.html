@@ -23,6 +23,13 @@
       width: 100%;
       z-index: 100;
     }
+    #loading {
+      display: none;
+      position: absolute;
+      text-align: center;
+      top: 45vh;
+      width: 100%;
+    }
     #map {
       height: 100%;
       width: 100%;
@@ -63,6 +70,7 @@
 
     <button onclick="fetchData()">Fetch Data</button>
   </div>
+  <div id="loading"><h1>Loading data...</h1></div>
   <div id="map"></div>
   <script src="/static/app.js"></script>
 </body>
