@@ -104,8 +104,8 @@ const fetchArrowData = async (animal, limit) => {
     initialViewState: {
       longitude,
       latitude,
-      zoom: 8,
-      maxZoom: 16,
+      zoom: 15,
+      maxZoom: 20,
     },
     controller: true,
     layers: [
