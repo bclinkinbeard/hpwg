@@ -1,17 +1,30 @@
 const { DeckGL, ScatterplotLayer } = deck
+const dataset = 'movebank'
+
+const fetchDatasetTables = async (dataset) => {
+  const xhr = await fetch(`/api/dataset/${dataset}/`, {
+    responseType: 'arraybuffer',
+  })
+  const buf = await xhr.arrayBuffer()
+  const table = Arrow.Table.from(buf)
+  console.log(table.getColumn('table_name').toArray());
+}
+
+fetchDatasetTables(dataset)
 
 const fetchData = async () => {
   const animal = document.getElementById('animal').value
   const useArrow = document.getElementById('useArrow').checked
+  const limit = document.getElementById('limit').value
   if (useArrow) {
-    fetchArrowData(animal)
+    fetchArrowData(animal, limit)
   } else {
-    fetchJsonData(animal)
+    fetchJsonData(animal, limit)
   }
 }
 
-const fetchJsonData = async (animal) => {
-  const xhr = await fetch(`/api/movebank/${animal}/`)
+const fetchJsonData = async (animal, limit) => {
+  const xhr = await fetch(`/api/movebank/${animal}/json/${+limit}/`)
   const arr = await xhr.json()
 
   let minLng, minLat, maxLng, maxLat
@@ -58,8 +71,8 @@ const fetchJsonData = async (animal) => {
   })
 }
 
-const fetchArrowData = async (animal) => {
-  const xhr = await fetch(`/api/movebank/${animal}/arrow/`, {
+const fetchArrowData = async (animal, limit) => {
+  const xhr = await fetch(`/api/movebank/${animal}/arrow/${+limit}/`, {
     responseType: 'arraybuffer',
   })
   const buf = await xhr.arrayBuffer()
