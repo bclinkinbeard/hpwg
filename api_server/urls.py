@@ -1,18 +1,11 @@
-from django.urls import path
 from django.shortcuts import render
-from django.urls import include, path
+from django.urls import include, path, re_path
 
 from . import views
 
 urlpatterns = [
-    path('movebank/wildebeest/arrow', views.movebank_wildebeest_arrow,
-         name='movebank_wildebeest_arrow'),
-    path('movebank/wildebeest/', views.movebank_wildebeest,
-         name='movebank_wildebeest'),
+    re_path(r'^movebank/(?P<table>\w+)/$', views.movebank),
+    re_path(r'^movebank/(?P<table>\w+)/(?P<format>\w+)/$', views.movebank),
 
     path('ny-taxi-tables/', views.ny_taxi_tables, name='ny_taxi_tables'),
-    path('nytaxi/trips', views.nytaxi_trips, name='nytaxi_trips'),
-    path('nytaxi/<str:table_name>/sample',
-         views.ny_taxi_table_sample, name='ny_taxi_table_sample'),
-    path('arrow/', views.arrow, name='arrow'),
 ]

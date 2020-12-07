@@ -1,7 +1,17 @@
 const { DeckGL, ScatterplotLayer } = deck
 
 const fetchData = async () => {
-  const xhr = await fetch('/api/movebank/wildebeest/')
+  const animal = document.getElementById('animal').value
+  const useArrow = document.getElementById('useArrow').checked
+  if (useArrow) {
+    fetchArrowData(animal)
+  } else {
+    fetchJsonData(animal)
+  }
+}
+
+const fetchJsonData = async (animal) => {
+  const xhr = await fetch(`/api/movebank/${animal}/`)
   const arr = await xhr.json()
 
   let minLng, minLat, maxLng, maxLat
@@ -48,8 +58,8 @@ const fetchData = async () => {
   })
 }
 
-const fetchArrowData = async () => {
-  const xhr = await fetch('/api/movebank/wildebeest/arrow', {
+const fetchArrowData = async (animal) => {
+  const xhr = await fetch(`/api/movebank/${animal}/arrow/`, {
     responseType: 'arraybuffer',
   })
   const buf = await xhr.arrayBuffer()
@@ -85,7 +95,7 @@ const fetchArrowData = async () => {
         radiusScale: 10,
         radiusMinPixels: 2,
         getPosition: (d, i) => [lngs[i.index], lats[i.index], 0],
-        getFillColor: [255, 0, 255],
+        getFillColor: [255, 40, 255],
       }),
     ],
     getTooltip: ({ index }) => {
@@ -93,14 +103,12 @@ const fetchArrowData = async () => {
       const name = table.getColumn('individual_local_identifier').get(index)
       const ts = table.getColumn('timestamp').get(index)
       return (
-        (
         index > -1 && {
-            html: `<b>${name}</b><br/>${new Date(ts).toISOString()}`,
-            style: {
-              fontFamily: 'Arial, Helvetica, sans-serif',
-            },
-          }
-      )
+          html: `<b>${name}</b><br/>${new Date(ts).toISOString()}`,
+          style: {
+            fontFamily: 'Arial, Helvetica, sans-serif',
+          },
+        }
       )
     },
   })

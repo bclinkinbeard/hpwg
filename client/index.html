@@ -6,16 +6,21 @@
   <title>High Performance Web Graphics Sandbox</title>
   <style>
     body {
+      font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       height: 100vh;
       margin: 0;
       width: 100vw;
     }
-    button {
-      font-family: Arial, Helvetica, sans-serif;
-      padding: 0.5rem;
+    select {
+      margin-left: 0.5rem;
     }
-    .buttons {
+    .config {
+      align-items: center;
+      display: flex;
+      justify-content: center;
+      margin-top: 0.4rem;
       position: absolute;
+      width: 100%;
       z-index: 100;
     }
     #map {
@@ -29,9 +34,21 @@
   <script src="https://unpkg.com/apache-arrow@2.0.0/Arrow.es5.min.js"></script>
 </head>
 <body>
-  <div class="buttons">
+  <div class="config">
+    <label for="animal">Animal</label>
+    <select name="table" id="animal">
+      <option value="petrel">Antarctic Petrel</option>
+      <option value="wildebeest">Wildebeest</option>
+    </select>
+
+    <span style="width: 1rem;"></span>
+
+    <label for="useArrow">Use Arrow?</label>
+    <input type="checkbox" name="useArrow" id="useArrow">
+
+    <span style="width: 1rem;"></span>
+
     <button onclick="fetchData()">Fetch Data</button>
-    <button onclick="fetchArrowData()">Fetch Arrow Data</button>
   </div>
   <div id="map"></div>
   <script src="/static/app.js"></script>
