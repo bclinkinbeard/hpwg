@@ -5,6 +5,20 @@ function init() {
   fetchData()
 }
 
+function columnStats(column) {
+  let max = column.get(0)
+  let min = max
+  for (let value of column) {
+    if (value === null) continue
+    if (value > max) {
+      max = value
+    } else if (value < min) {
+      min = value
+    }
+  }
+  return { min, max, range: max - min }
+}
+
 const fetchDatasetTables = async (dataset) => {
   const xhr = await fetch(`/api/dataset/${dataset}/`, {
     responseType: 'arraybuffer',
@@ -81,22 +95,21 @@ const fetchArrowData = async (animal, limit) => {
     responseType: 'arraybuffer',
   })
   const buf = await xhr.arrayBuffer()
-  document.getElementById('loading').style.display = 'none';
+  document.getElementById('loading').style.display = 'none'
   const table = Arrow.Table.from(buf)
-  const lngs = table.getColumn('location_long').toArray()
-  const lats = table.getColumn('location_lat').toArray()
+  const lngs = table.getColumn('location_long')
+  const lats = table.getColumn('location_lat')
+  const lngStats = columnStats(table.getColumn('location_long'))
+  const latStats = columnStats(table.getColumn('location_lat'))
+  const timeStats = columnStats(table.getColumn('timestamp'))
+  console.log(
+    new Date(timeStats.min).toISOString(),
+    '-',
+    new Date(timeStats.max).toISOString(),
+  )
 
-  let minLng, minLat, maxLng, maxLat
-
-  for (let i = 0; i < lngs.length; i++) {
-    minLng = minLng ? Math.min(minLng, lngs[i]) : lngs[i]
-    maxLng = maxLng ? Math.max(maxLng, lngs[i]) : lngs[i]
-    minLat = minLat ? Math.min(minLat, lats[i]) : lats[i]
-    maxLat = maxLat ? Math.max(maxLat, lats[i]) : lats[i]
-  }
-
-  const longitude = (minLng + maxLng) / 2
-  const latitude = (minLat + maxLat) / 2
+  const longitude = (lngStats.min + lngStats.max) / 2
+  const latitude = (latStats.min + latStats.max) / 2
 
   new DeckGL({
     container: 'map',
@@ -117,12 +130,8 @@ const fetchArrowData = async (animal, limit) => {
         pickable: true,
         radiusScale: 10,
         radiusMinPixels: 2,
-        getPosition: (d, i) => [lngs[i.index], lats[i.index], 0],
-        getFillColor: (d, i) => {
-          const lngRatio = (lngs[i.index] - minLng) / (maxLng - minLng)
-          const latRatio = (lats[i.index] - minLat) / (maxLat - minLat)
-          return [255 * lngRatio, 40, 255 * (1 - latRatio)]
-        },
+        getPosition: (d, i) => [lngs.get(i.index), lats.get(i.index), 0],
+        getFillColor: [255, 40, 255],
       }),
     ],
     getTooltip: ({ index }) => {
