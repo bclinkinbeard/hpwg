@@ -1,3 +1,5 @@
-export const six = 6;
+import * as deck from '@deck.gl/core';
+import * as layers from '@deck.gl/layers';
 
-console.log(six);
+console.log(deck.Deck);
+console.log(layers.ScatterplotLayer);
