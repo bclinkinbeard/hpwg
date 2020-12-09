@@ -21,6 +21,7 @@
     "@danmarshall/deckgl-typings": "^4.4.0",
     "@deck.gl/core": "^8.3.11",
     "@deck.gl/layers": "^8.3.11",
+    "apache-arrow": "^2.0.0",
     "copy-webpack-plugin": "^6.4.0"
   }
 }
