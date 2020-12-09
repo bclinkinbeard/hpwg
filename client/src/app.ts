@@ -2,22 +2,14 @@
 // import * as layers from '@deck.gl/layers';
 // const { Deck } = deck
 // const {ScatterplotLayer} = layers
-const { DeckGL, ScatterplotLayer} = (window as any).deck;
-import * as Arrow from 'apache-arrow';
+const { DeckGL, ScatterplotLayer } = (window as any).deck
+import * as Arrow from 'apache-arrow'
+import { $ } from './helpers'
 
 const dataset = 'movebank'
 
-const $ = <T extends HTMLElement = HTMLElement>(query: string) => {
-  if (query.startsWith('#')) {
-    return document.getElementById(query.substr(1)) as T
-  }
-}
-
 function init() {
-  const fetchBtn = $<HTMLButtonElement>('#fetchBtn')!;
-  console.log(fetchBtn);
-  console.log(document.getElementById('fetchBtn'));
-  // fetchBtn.onclick = fetchData;
+  $<HTMLButtonElement>('#fetchBtn').onclick = fetchData
   fetchData()
 }
 
@@ -39,11 +31,11 @@ const fetchDatasetTables = async (dataset: string) => {
   const xhr = await fetch(`/api/dataset/${dataset}/`)
   const buf = await xhr.arrayBuffer()
   const table = Arrow.Table.from(buf)
-  console.log(table.getColumn('table_name').toArray());
+  console.log(table.getColumn('table_name').toArray())
 }
 
 const fetchData = async () => {
-  document.getElementById('loading')!.style.display = 'block';
+  document.getElementById('loading')!.style.display = 'block'
   document.getElementById('map')!.textContent = ''
   const animal = $<HTMLSelectElement>('#animal')?.value
   const useArrow = $<HTMLInputElement>('#useArrow')?.checked
@@ -91,7 +83,7 @@ const fetchArrowData = async (animal: string, limit: number) => {
         pickable: true,
         radiusScale: 10,
         radiusMinPixels: 2,
-        getPosition: (d: unknown, i: {index: number}) => {
+        getPosition: (d: unknown, i: { index: number }) => {
           return [lngs.get(i.index), lats.get(i.index), 0]
         },
         getFillColor: [255, 40, 255],
@@ -99,7 +91,9 @@ const fetchArrowData = async (animal: string, limit: number) => {
     ],
     getTooltip: (data: { index: number }) => {
       if (data.index < 0) return
-      const name = table.getColumn('individual_local_identifier').get(data.index)
+      const name = table
+        .getColumn('individual_local_identifier')
+        .get(data.index)
       const ts = table.getColumn('timestamp').get(data.index)
       return (
         data.index > -1 && {
@@ -114,4 +108,3 @@ const fetchArrowData = async (animal: string, limit: number) => {
 }
 
 init()
-
