@@ -5,7 +5,7 @@
 const { DeckGL, ScatterplotLayer } = (window as any).deck
 import * as Arrow from 'apache-arrow'
 import { $, columnStats } from './helpers'
-import { initTimeScrubber } from './time-scrubber'
+import TimeScrubber from './time-scrubber'
 
 // shortcuts to DOM elements
 const dom = {
@@ -19,9 +19,11 @@ const dom = {
 // set the initial DOM values
 const initDOM = () => {
   dom.animalSelect.value = 'wildebeest'
-  dom.limitSelect.value = '5e3'
+  dom.limitSelect.value = '1e3'
   dom.fetchBtn.onclick = updateMap
 }
+
+const timeScrubber = new TimeScrubber('#scrubber')
 
 const fetchData = async (animal: string, limit: number) => {
   dom.loading.style.display = 'block'
@@ -43,7 +45,8 @@ const updateMap = async () => {
   const lngStats = columnStats(table.getColumn('location_long'))
   const latStats = columnStats(table.getColumn('location_lat'))
   const timeStats = columnStats(table.getColumn('timestamp'))
-  initTimeScrubber('#scrubber', timeStats.min, timeStats.max)
+
+  timeScrubber.setTimeBounds(timeStats.min, timeStats.max)
 
   const longitude = (lngStats.min + lngStats.max) / 2
   const latitude = (latStats.min + latStats.max) / 2

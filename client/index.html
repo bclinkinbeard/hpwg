@@ -6,7 +6,7 @@
   <title>High Performance Web Graphics Sandbox</title>
   <style>
     body {
-      font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'system-ui';
       height: 100vh;
       margin: 0;
       width: 100vw;
@@ -16,10 +16,14 @@
     }
     .config {
       align-items: center;
+      background-color: #004fa8;
+      box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+      color: #DEDEDE;
       display: flex;
+      font-size: 1rem;
       justify-content: center;
-      margin-top: 0.4rem;
       position: absolute;
+      padding: 0.5rem 0 1.25rem;
       width: 100%;
       z-index: 100;
     }
@@ -31,11 +35,13 @@
       width: 100%;
     }
     #map {
-      height: 85%;
+      height: 100%;
       width: 100%;
     }
     #scrubber {
-      height: 15%;
+      bottom: 30px;
+      position: absolute;
+      height: 100px;
       width: 100%;
     }
   </style>
