@@ -5,6 +5,7 @@
 const { DeckGL, ScatterplotLayer } = (window as any).deck
 import * as Arrow from 'apache-arrow'
 import { $, columnStats } from './helpers'
+import { initTimeScrubber } from './time-scrubber'
 
 // shortcuts to DOM elements
 const dom = {
@@ -42,11 +43,7 @@ const updateMap = async () => {
   const lngStats = columnStats(table.getColumn('location_long'))
   const latStats = columnStats(table.getColumn('location_lat'))
   const timeStats = columnStats(table.getColumn('timestamp'))
-  console.log(
-    new Date(timeStats.min).toISOString(),
-    '-',
-    new Date(timeStats.max).toISOString(),
-  )
+  initTimeScrubber('#scrubber', timeStats.min, timeStats.max)
 
   const longitude = (lngStats.min + lngStats.max) / 2
   const latitude = (latStats.min + latStats.max) / 2

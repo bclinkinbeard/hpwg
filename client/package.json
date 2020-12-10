@@ -12,6 +12,7 @@
   "author": "Ben Clinkinbeard <ben.clinkinbeard@gmail.com>",
   "license": "ISC",
   "devDependencies": {
+    "@types/d3": "^6.2.0",
     "prettier": "^2.2.1",
     "ts-loader": "^8.0.11",
     "typescript": "^4.1.2",
@@ -23,7 +24,8 @@
     "@deck.gl/core": "^8.3.11",
     "@deck.gl/layers": "^8.3.11",
     "apache-arrow": "^2.0.0",
-    "copy-webpack-plugin": "^6.4.0"
+    "copy-webpack-plugin": "^6.4.0",
+    "d3": "^6.3.1"
   },
   "prettier": {
     "semi": false,
