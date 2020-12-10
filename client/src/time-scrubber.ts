@@ -16,6 +16,10 @@ export default class TimeScrubber {
   handleWidth = 20
   margin = { top: 0, right: 0, bottom: 0, left: 0 }
 
+  brush!: d3.BrushBehavior<unknown>
+  isPlaying = false
+  isScrubbing = false
+
   get contextWidth() {
     const { width } = this.hostEl.getBoundingClientRect()
     return width - this.margin.left - this.margin.right
@@ -85,6 +89,38 @@ export default class TimeScrubber {
     this.maxHandle = this.markingsGroup
       .append<SVGGElement>('g')
       .call(this.buildHandle)
+
+    this.brush = d3
+      .brushX()
+      .extent([
+        [0, 0],
+        [this.contextWidth, this.contextHeight],
+      ])
+      .on('start brush end', () => {
+        if (this.isPlaying) return
+        switch (d3.event.type) {
+          case 'start':
+            this.isScrubbing = true
+            // this.animate();
+            break
+          case 'end':
+            this.isScrubbing = false
+            // this.cancelAnimation();
+            break
+          default:
+          // no-op
+        }
+        // const [left, right] = d3.event.selection;
+        // this.minFilterDate = this.xScale.invert(left);
+        // this.maxFilterDate = this.xScale.invert(right);
+        // this.minDateText.text(this.minFilterDate.toLocaleString());
+        // this.maxDateText.text(this.maxFilterDate.toLocaleString());
+      })
+
+    // this.g.append<SVGGElement>('g')
+    //     .attr('class', 'brush')
+    //     .call(this.brush)
+    // .call(this.brush.move, this.xScale.range());
   }
 
   resetHandles() {
