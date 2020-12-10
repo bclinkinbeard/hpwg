@@ -1,0 +1,33 @@
+{
+  "name": "client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "clean": "rm -rf dist/**",
+    "wp": "npm run clean && webpack",
+    "wpw": "npm run clean && webpack --watch"
+  },
+  "keywords": [],
+  "author": "Ben Clinkinbeard <ben.clinkinbeard@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "prettier": "^2.2.1",
+    "ts-loader": "^8.0.11",
+    "typescript": "^4.1.2",
+    "webpack": "^5.10.0",
+    "webpack-cli": "^4.2.0"
+  },
+  "dependencies": {
+    "@danmarshall/deckgl-typings": "^4.4.0",
+    "@deck.gl/core": "^8.3.11",
+    "@deck.gl/layers": "^8.3.11",
+    "apache-arrow": "^2.0.0",
+    "copy-webpack-plugin": "^6.4.0"
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "all"
+  }
+}

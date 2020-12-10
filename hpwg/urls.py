@@ -18,7 +18,7 @@ from django.shortcuts import render
 from django.urls import include, path
 
 def client(request):
-    return render(request, 'client/index.html')
+    return render(request, 'client/dist/index.html')
 
 urlpatterns = [
     path('', client),
