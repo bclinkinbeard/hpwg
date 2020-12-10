@@ -4,51 +4,38 @@
 // const {ScatterplotLayer} = layers
 const { DeckGL, ScatterplotLayer } = (window as any).deck
 import * as Arrow from 'apache-arrow'
-import { $ } from './helpers'
+import { $, columnStats } from './helpers'
 
-const dataset = 'movebank'
-
-function init() {
-  $<HTMLButtonElement>('#fetchBtn').onclick = fetchData
-  fetchData()
+// shortcuts to DOM elements
+const dom = {
+  animalSelect: $<HTMLSelectElement>('#animal'),
+  fetchBtn: $<HTMLButtonElement>('#fetchBtn'),
+  limitSelect: $<HTMLSelectElement>('#limit'),
+  loading: $('#loading'),
+  map: $('#map'),
 }
 
-function columnStats(column: Arrow.Column) {
-  let max = column.get(0)
-  let min = max
-  for (let value of column) {
-    if (value === null) continue
-    if (value > max) {
-      max = value
-    } else if (value < min) {
-      min = value
-    }
-  }
-  return { min, max, range: max - min }
+// set the initial DOM values
+const initDOM = () => {
+  dom.animalSelect.value = 'wildebeest'
+  dom.limitSelect.value = '5e3'
+  dom.fetchBtn.onclick = updateMap
 }
 
-const fetchDatasetTables = async (dataset: string) => {
-  const xhr = await fetch(`/api/dataset/${dataset}/`)
-  const buf = await xhr.arrayBuffer()
-  const table = Arrow.Table.from(buf)
-  console.log(table.getColumn('table_name').toArray())
-}
+const fetchData = async (animal: string, limit: number) => {
+  dom.loading.style.display = 'block'
+  dom.map.textContent = ''
 
-const fetchData = async () => {
-  document.getElementById('loading')!.style.display = 'block'
-  document.getElementById('map')!.textContent = ''
-  const animal = $<HTMLSelectElement>('#animal')?.value
-  const useArrow = $<HTMLInputElement>('#useArrow')?.checked
-  const limit = $<HTMLSelectElement>('#limit')?.value
-  if (useArrow) {
-    fetchArrowData(animal!, +limit!)
-  }
-}
-
-const fetchArrowData = async (animal: string, limit: number) => {
   const xhr = await fetch(`/api/movebank/${animal}/arrow/${+limit}/`)
   const buf = await xhr.arrayBuffer()
-  document.getElementById('loading')!.style.display = 'none'
+
+  dom.loading.style.display = 'none'
+
+  return buf
+}
+
+const updateMap = async () => {
+  const buf = await fetchData(dom.animalSelect.value!, +dom.limitSelect.value!)
   const table = Arrow.Table.from(buf)
   const lngs = table.getColumn('location_long')
   const lats = table.getColumn('location_lat')
@@ -107,4 +94,5 @@ const fetchArrowData = async (animal: string, limit: number) => {
   })
 }
 
-init()
+initDOM()
+updateMap()
