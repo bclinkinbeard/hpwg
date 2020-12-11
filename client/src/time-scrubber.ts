@@ -19,6 +19,9 @@ export default class TimeScrubber {
   isPlaying = false
   isScrubbing = false
 
+  minTimeFilter?: number
+  maxTimeFilter?: number
+
   get contextWidth() {
     const { width } = this.hostEl.getBoundingClientRect()
     return width - this.margin.left - this.margin.right
@@ -96,6 +99,7 @@ export default class TimeScrubber {
           // no-op
         }
         const [left, right] = d3.event.selection
+        // TODO: use fields
         const minFilterDate = this.timeScale!.invert(left)
         const maxFilterDate = this.timeScale!.invert(right)
         this.minTimeLabel.text(minFilterDate.toLocaleString())
@@ -115,15 +119,15 @@ export default class TimeScrubber {
   ) => {
     selection
       .selectAll('.handle')
-      .attr('x', (d, i) => i * this.contextWidth - (i * this.handleWidth))
+      .attr('x', (d, i) => i * this.contextWidth - i * this.handleWidth)
       .attr('y', 0)
       .attr('width', this.handleWidth)
       .attr('height', this.contextHeight)
   }
 
   setTimeBounds(minTime: number, maxTime: number) {
-    this.minTime = minTime
-    this.maxTime = maxTime
+    this.minTime = this.minTimeFilter = minTime
+    this.maxTime = this.maxTimeFilter = maxTime
     this.minTimeLabel.text(new Date(this.minTime).toISOString())
     this.maxTimeLabel.text(new Date(this.maxTime).toISOString())
     this.timeScale = d3
@@ -131,5 +135,16 @@ export default class TimeScrubber {
       .domain([this.minTime, this.maxTime])
       .range([0, this.contextWidth])
     this.initBrush()
+  }
+
+  setTimeFilter(minTime: number, maxTime: number) {
+    this.minTimeFilter = minTime
+    this.maxTimeFilter = maxTime
+    const extent = [
+      this.timeScale!(minTime),
+      this.timeScale!(maxTime),
+    ]
+    // @ts-ignore
+    this.markingsGroup.selectAll('.brush').call(this.brush.move, extent);
   }
 }
