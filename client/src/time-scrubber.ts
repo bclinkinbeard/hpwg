@@ -7,16 +7,15 @@ export default class TimeScrubber {
   baseGroup!: d3.Selection<SVGGElement, {}, d3.BaseType, undefined>
   markingsGroup!: d3.Selection<SVGGElement, {}, d3.BaseType, undefined>
 
-  minHandle!: d3.Selection<SVGGElement, {}, d3.BaseType, undefined>
-  maxHandle!: d3.Selection<SVGGElement, {}, d3.BaseType, undefined>
   minTimeLabel!: d3.Selection<SVGTextElement, {}, d3.BaseType, undefined>
   maxTimeLabel!: d3.Selection<SVGTextElement, {}, d3.BaseType, undefined>
 
-  handleColor = '#004fa8'
-  handleWidth = 20
+  timeScale?: d3.ScaleTime<number, number>
+
   margin = { top: 0, right: 0, bottom: 0, left: 0 }
 
-  brush!: d3.BrushBehavior<unknown>
+  brush!: d3.BrushBehavior<{}>
+  handleWidth = 8
   isPlaying = false
   isScrubbing = false
 
@@ -35,8 +34,6 @@ export default class TimeScrubber {
     this.initDOM()
     if (minTime && maxTime) {
       this.setTimeBounds(minTime, maxTime)
-    } else {
-      this.resetHandles()
     }
   }
 
@@ -64,40 +61,28 @@ export default class TimeScrubber {
     // drawing context for all chart markings
     this.markingsGroup = this.baseGroup.append<SVGGElement>('g')
 
-    // between the handles
-    this.markingsGroup
-      .append('rect')
-      .attr('x', this.handleWidth)
-      .attr('width', this.contextWidth - this.handleWidth * 2)
-      .attr('height', this.contextHeight)
-      .style('fill', '#c1cede')
-
     this.minTimeLabel = this.markingsGroup
       .append('text')
-      .attr('x', this.handleWidth * 1.5)
+      .attr('x', 30)
       .attr('y', 30)
 
     this.maxTimeLabel = this.markingsGroup
       .append('text')
-      .attr('x', this.contextWidth - this.handleWidth * 1.5)
+      .attr('x', this.contextWidth - 30)
       .attr('y', 30)
       .attr('text-anchor', 'end')
+  }
 
-    this.minHandle = this.markingsGroup
-      .append<SVGGElement>('g')
-      .call(this.buildHandle)
-    this.maxHandle = this.markingsGroup
-      .append<SVGGElement>('g')
-      .call(this.buildHandle)
-
+  initBrush() {
     this.brush = d3
-      .brushX()
+      .brushX<{}>()
       .extent([
         [0, 0],
         [this.contextWidth, this.contextHeight],
       ])
+      .handleSize(10)
       .on('start brush end', () => {
-        if (this.isPlaying) return
+        if (this.isPlaying || !d3.event) return
         switch (d3.event.type) {
           case 'start':
             this.isScrubbing = true
@@ -110,35 +95,30 @@ export default class TimeScrubber {
           default:
           // no-op
         }
-        // const [left, right] = d3.event.selection;
-        // this.minFilterDate = this.xScale.invert(left);
-        // this.maxFilterDate = this.xScale.invert(right);
-        // this.minDateText.text(this.minFilterDate.toLocaleString());
-        // this.maxDateText.text(this.maxFilterDate.toLocaleString());
+        const [left, right] = d3.event.selection
+        const minFilterDate = this.timeScale!.invert(left)
+        const maxFilterDate = this.timeScale!.invert(right)
+        this.minTimeLabel.text(minFilterDate.toLocaleString())
+        this.maxTimeLabel.text(maxFilterDate.toLocaleString())
       })
 
-    // this.g.append<SVGGElement>('g')
-    //     .attr('class', 'brush')
-    //     .call(this.brush)
-    // .call(this.brush.move, this.xScale.range());
+    this.markingsGroup
+      .append<SVGGElement>('g')
+      .attr('class', 'brush')
+      .call(this.brush)
+      .call(this.brush.move, this.timeScale?.range())
+      .call(this.brushHandles)
   }
 
-  resetHandles() {
-    this.minHandle.attr('transform', `translate(0, 0)`)
-    this.maxHandle.attr(
-      'transform',
-      `translate(${this.contextWidth - this.handleWidth}, 0)`,
-    )
-  }
-
-  buildHandle = (
+  brushHandles = (
     selection: d3.Selection<SVGGElement, {}, d3.BaseType, undefined>,
   ) => {
-    return selection
-      .append('rect')
+    selection
+      .selectAll('.handle')
+      .attr('x', (d, i) => i * this.contextWidth - (i * this.handleWidth))
+      .attr('y', 0)
       .attr('width', this.handleWidth)
       .attr('height', this.contextHeight)
-      .style('fill', this.handleColor)
   }
 
   setTimeBounds(minTime: number, maxTime: number) {
@@ -146,6 +126,10 @@ export default class TimeScrubber {
     this.maxTime = maxTime
     this.minTimeLabel.text(new Date(this.minTime).toISOString())
     this.maxTimeLabel.text(new Date(this.maxTime).toISOString())
-    this.resetHandles()
+    this.timeScale = d3
+      .scaleTime()
+      .domain([this.minTime, this.maxTime])
+      .range([0, this.contextWidth])
+    this.initBrush()
   }
 }
