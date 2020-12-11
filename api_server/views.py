@@ -6,7 +6,8 @@ from django.http import HttpResponse
 from google.cloud import bigquery
 
 GCP_PROJECT = "hpwg-297320"
-
+TESTING = True
+lastBuf = None
 
 def arrow_table_to_pybytes(arrow_table):
     sink = pa.BufferOutputStream()
@@ -46,12 +47,15 @@ def get_query_job(dataset='movebank', table='wildebeest', columns='*', limit=100
     query = f"SELECT {columns} FROM {GCP_PROJECT}.{dataset}.{table} LIMIT {limit}"
     return bigquery.Client().query(query)
 
-
 def movebank(request, table, format='json', limit=1000):
+    global lastBuf
+    if (TESTING and lastBuf != None):
+        return HttpResponse(lastBuf, content_type='application/octet-stream')
+
     query_job = get_query_job('movebank', table, '*', limit)
 
     if format == 'json':
         return HttpResponse(query_job_to_json(query_job))
     else:
-        buf = arrow_table_to_pybytes(query_job.to_arrow())
+        lastBuf = buf = arrow_table_to_pybytes(query_job.to_arrow())
         return HttpResponse(buf, content_type='application/octet-stream')
