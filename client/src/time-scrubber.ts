@@ -54,7 +54,7 @@ export default class TimeScrubber {
       .append<SVGRectElement>('rect')
       .attr('width', width)
       .attr('height', height)
-      .style('fill', 'grey')
+      .style('fill', 'white')
 
     // container for markings and axis groups
     this.baseGroup = this.svg
@@ -140,11 +140,12 @@ export default class TimeScrubber {
   setTimeFilter(minTime: number, maxTime: number) {
     this.minTimeFilter = minTime
     this.maxTimeFilter = maxTime
-    const extent = [
-      this.timeScale!(minTime),
-      this.timeScale!(maxTime),
-    ]
+    const extent = [this.timeScale!(minTime), this.timeScale!(maxTime)]
     // @ts-ignore
-    this.markingsGroup.selectAll('.brush').call(this.brush.move, extent);
+    this.markingsGroup.selectAll('.brush').call(this.brush.move, extent)
+  }
+
+  setDuration(duration: number) {
+    this.setTimeFilter(this.minTime!, this.minTime! + duration)
   }
 }

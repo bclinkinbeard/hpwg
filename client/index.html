@@ -40,6 +40,7 @@
     }
     #scrubber {
       bottom: 50px;
+      box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
       position: absolute;
       height: 75px;
       width: 100%;
@@ -50,6 +51,26 @@
     }
     .handle {
       fill: #004fa8;
+    }
+    #bottom-bar {
+      bottom: 0;
+      display: flex;
+      position: absolute;
+      width: 100%;
+    }
+    #bottom-bar button:not(:last-child) {
+      margin-right: 1rem;
+    }
+    #durations {
+      align-items: center;
+      bottom: 0;
+      display: flex;
+      height: 50px;
+      justify-content: center;
+      width: 50%;
+    }
+    #controls {
+      width: 50%;
     }
   </style>
   <script src='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
@@ -87,6 +108,10 @@
   <div id="loading"><h1>Loading data...</h1></div>
   <div id="map"></div>
   <div id="scrubber"></div>
+  <div id="bottom-bar">
+    <div id="durations"></div>
+    <div id="controls"></div>
+  </div>
   <script src="/static/app-bundle.js"></script>
 </body>
 </html>

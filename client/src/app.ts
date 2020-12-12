@@ -4,12 +4,16 @@
 // const {ScatterplotLayer} = layers
 const { DeckGL, ScatterplotLayer } = (window as any).deck
 import * as Arrow from 'apache-arrow'
-import { $, columnStats } from './helpers'
+import { $, columnStats, DURATIONS } from './helpers'
 import TimeScrubber from './time-scrubber'
+
+const { DAY, WEEK, MONTH } = DURATIONS
 
 // shortcuts to DOM elements
 const dom = {
   animalSelect: $<HTMLSelectElement>('#animal'),
+  durations: $('#durations'),
+  controls: $('#controls'),
   fetchBtn: $<HTMLButtonElement>('#fetchBtn'),
   limitSelect: $<HTMLSelectElement>('#limit'),
   loading: $('#loading'),
@@ -21,6 +25,23 @@ const initDOM = () => {
   dom.animalSelect.value = 'wildebeest'
   dom.limitSelect.value = '1e3'
   dom.fetchBtn.onclick = updateMap
+
+  const durations = [
+    { key: 'One Day', val: DAY },
+    { key: 'One Week', val: WEEK },
+    { key: 'One Month', val: MONTH },
+    { key: 'Six Months', val: MONTH * 6 },
+    { key: 'One Year', val: MONTH * 12 },
+  ]
+  for (let i = 0; i < durations.length; i++) {
+    const duration = durations[i]
+    const btn = document.createElement('button')
+    btn.textContent = duration.key
+    btn.onclick = () => {
+      timeScrubber.setDuration(duration.val)
+    }
+    dom.durations.appendChild(btn)
+  }
 }
 
 const timeScrubber = new TimeScrubber('#scrubber')
