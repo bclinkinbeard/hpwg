@@ -61,15 +61,12 @@
     #bottom-bar button:not(:last-child) {
       margin-right: 1rem;
     }
-    #durations {
+    #durations, #controls {
       align-items: center;
       bottom: 0;
       display: flex;
       height: 50px;
       justify-content: center;
-      width: 50%;
-    }
-    #controls {
       width: 50%;
     }
   </style>
@@ -110,7 +107,9 @@
   <div id="scrubber"></div>
   <div id="bottom-bar">
     <div id="durations"></div>
-    <div id="controls"></div>
+    <div id="controls">
+      <button id="playPause">Play/Pause</button>
+    </div>
   </div>
   <script src="/static/app-bundle.js"></script>
 </body>

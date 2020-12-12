@@ -1,5 +1,5 @@
 import * as d3 from 'd3'
-import { $ } from './helpers'
+import { $, DURATIONS } from './helpers'
 
 export default class TimeScrubber {
   hostEl: HTMLDivElement
@@ -16,6 +16,7 @@ export default class TimeScrubber {
 
   brush!: d3.BrushBehavior<{}>
   handleWidth = 8
+  frameId = 0
   isPlaying = false
   isScrubbing = false
 
@@ -99,7 +100,6 @@ export default class TimeScrubber {
           // no-op
         }
         const [left, right] = d3.event.selection
-        // TODO: use fields
         const minFilterDate = this.timeScale!.invert(left)
         const maxFilterDate = this.timeScale!.invert(right)
         this.minTimeLabel.text(minFilterDate.toLocaleString())
@@ -128,8 +128,8 @@ export default class TimeScrubber {
   setTimeBounds(minTime: number, maxTime: number) {
     this.minTime = this.minTimeFilter = minTime
     this.maxTime = this.maxTimeFilter = maxTime
-    this.minTimeLabel.text(new Date(this.minTime).toISOString())
-    this.maxTimeLabel.text(new Date(this.maxTime).toISOString())
+    this.minTimeLabel.text(new Date(this.minTime).toLocaleString())
+    this.maxTimeLabel.text(new Date(this.maxTime).toLocaleString())
     this.timeScale = d3
       .scaleTime()
       .domain([this.minTime, this.maxTime])
@@ -143,9 +143,29 @@ export default class TimeScrubber {
     const extent = [this.timeScale!(minTime), this.timeScale!(maxTime)]
     // @ts-ignore
     this.markingsGroup.selectAll('.brush').call(this.brush.move, extent)
+    this.minTimeLabel.text(new Date(this.minTimeFilter).toLocaleString())
+    this.maxTimeLabel.text(new Date(this.maxTimeFilter).toLocaleString())
   }
 
   setDuration(duration: number) {
     this.setTimeFilter(this.minTime!, this.minTime! + duration)
+  }
+
+  togglePlay() {
+    this.isPlaying = !this.isPlaying
+    if (this.isPlaying) {
+      this.frameId = requestAnimationFrame(this.animate)
+    } else {
+      cancelAnimationFrame(this.frameId)
+    }
+  }
+
+  animate = () => {
+    const increment = DURATIONS.DAY
+    this.setTimeFilter(
+      this.minTimeFilter! + increment,
+      this.maxTimeFilter! + increment,
+    )
+    this.frameId = requestAnimationFrame(this.animate)
   }
 }

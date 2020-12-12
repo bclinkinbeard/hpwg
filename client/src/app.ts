@@ -18,6 +18,7 @@ const dom = {
   limitSelect: $<HTMLSelectElement>('#limit'),
   loading: $('#loading'),
   map: $('#map'),
+  playPause: $('#playPause'),
 }
 
 // set the initial DOM values
@@ -42,6 +43,8 @@ const initDOM = () => {
     }
     dom.durations.appendChild(btn)
   }
+
+  dom.playPause.onclick = () => timeScrubber.togglePlay()
 }
 
 const timeScrubber = new TimeScrubber('#scrubber')
