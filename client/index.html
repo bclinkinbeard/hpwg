@@ -58,6 +58,7 @@
       position: absolute;
       width: 100%;
     }
+    #bottom-bar select,
     #bottom-bar button:not(:last-child) {
       margin-right: 1rem;
     }
@@ -108,6 +109,17 @@
   <div id="bottom-bar">
     <div id="durations"></div>
     <div id="controls">
+      <select name="speed" id="speed">
+        <option value="1">1x</option>
+        <option value="2">2x</option>
+        <option value="5">5x</option>
+        <option value="10">10x</option>
+        <option value="60">1m:1s</option>
+        <option value="3600">1h:1s</option>
+        <option value="86400">1d:1s</option>
+        <option value="604800">1w:1s</option>
+        <option value="2592000">1mo:1s</option>
+      </select>
       <button id="playPause">Play/Pause</button>
     </div>
   </div>

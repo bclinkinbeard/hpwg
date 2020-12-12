@@ -1,6 +1,8 @@
 import * as d3 from 'd3'
 import { $, DURATIONS } from './helpers'
 
+const speedSelect = $<HTMLSelectElement>('#speed')
+
 export default class TimeScrubber {
   hostEl: HTMLDivElement
   svg!: d3.Selection<SVGSVGElement, {}, d3.BaseType, undefined>
@@ -17,6 +19,7 @@ export default class TimeScrubber {
   brush!: d3.BrushBehavior<{}>
   handleWidth = 8
   frameId = 0
+  prevTime = 0
   isPlaying = false
   isScrubbing = false
 
@@ -157,15 +160,22 @@ export default class TimeScrubber {
       this.frameId = requestAnimationFrame(this.animate)
     } else {
       cancelAnimationFrame(this.frameId)
+      this.prevTime = 0
     }
   }
 
-  animate = () => {
-    const increment = DURATIONS.DAY
+  animate = (t: number) => {
+    if (!this.prevTime) this.prevTime = t
+
+    const delta = t - this.prevTime
+
+    // increase each value by the real amount of time passed
+    // multiplied by the speed value
     this.setTimeFilter(
-      this.minTimeFilter! + increment,
-      this.maxTimeFilter! + increment,
+      this.minTimeFilter! + (delta * +speedSelect.value),
+      this.maxTimeFilter! + (delta * +speedSelect.value),
     )
     this.frameId = requestAnimationFrame(this.animate)
+    this.prevTime = t
   }
 }
