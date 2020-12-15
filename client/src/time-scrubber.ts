@@ -93,11 +93,9 @@ export default class TimeScrubber {
         switch (d3.event.type) {
           case 'start':
             this.isScrubbing = true
-            // this.animate();
             break
           case 'end':
             this.isScrubbing = false
-            // this.cancelAnimation();
             break
           default:
           // no-op
@@ -105,6 +103,8 @@ export default class TimeScrubber {
         const [left, right] = d3.event.selection
         const minFilterDate = this.timeScale!.invert(left)
         const maxFilterDate = this.timeScale!.invert(right)
+        this.minTimeFilter = minFilterDate.valueOf()
+        this.maxTimeFilter = maxFilterDate.valueOf()
         this.minTimeLabel.text(minFilterDate.toLocaleString())
         this.maxTimeLabel.text(maxFilterDate.toLocaleString())
       })
@@ -172,8 +172,8 @@ export default class TimeScrubber {
     // increase each value by the real amount of time passed
     // multiplied by the speed value
     this.setTimeFilter(
-      this.minTimeFilter! + (delta * +speedSelect.value),
-      this.maxTimeFilter! + (delta * +speedSelect.value),
+      this.minTimeFilter! + delta * +speedSelect.value,
+      this.maxTimeFilter! + delta * +speedSelect.value,
     )
     this.frameId = requestAnimationFrame(this.animate)
     this.prevTime = t
