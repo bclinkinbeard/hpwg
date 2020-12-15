@@ -19,6 +19,7 @@ const dom = {
   loading: $('#loading'),
   map: $('#map'),
   playPause: $('#playPause'),
+  loop: $<HTMLInputElement>('#loop'),
 }
 
 // set the initial DOM values
@@ -45,6 +46,8 @@ const initDOM = () => {
   }
 
   dom.playPause.onclick = () => timeScrubber.togglePlay()
+  dom.loop.checked = timeScrubber.loop
+  dom.loop.onchange = () => (timeScrubber.loop = dom.loop.checked)
 }
 
 const timeScrubber = new TimeScrubber('#scrubber')

@@ -22,6 +22,7 @@ export default class TimeScrubber {
   prevTime = 0
   isPlaying = false
   isScrubbing = false
+  loop = true
 
   minTimeFilter?: number
   maxTimeFilter?: number
@@ -151,31 +152,52 @@ export default class TimeScrubber {
   }
 
   setDuration(duration: number) {
-    this.setTimeFilter(this.minTime!, this.minTime! + duration)
+    this.setTimeFilter(this.minTimeFilter!, this.minTimeFilter! + duration)
   }
 
   togglePlay() {
     this.isPlaying = !this.isPlaying
     if (this.isPlaying) {
-      this.frameId = requestAnimationFrame(this.animate)
+      this.animate()
     } else {
-      cancelAnimationFrame(this.frameId)
-      this.prevTime = 0
+      this.cancelAnimation()
     }
   }
 
-  animate = (t: number) => {
-    if (!this.prevTime) this.prevTime = t
+  animate = (t?: number) => {
+    let inc = 0
 
-    const delta = t - this.prevTime
+    if (t) {
+      if (this.prevTime === 0) this.prevTime = t
+      const delta = t - this.prevTime
+      this.prevTime = t
+      inc = delta * +speedSelect.value
+    }
 
+    let newMin = this.minTimeFilter! + inc
+    let newMax = this.maxTimeFilter! + inc
+    if (newMax >= this.maxTime!) {
+      if (this.loop) {
+        newMax = this.minTime! + (newMax - newMin)
+        newMin = this.minTime!
+      } else {
+        this.cancelAnimation()
+        newMin = this.maxTime! - (newMax - newMin)
+        newMax = this.maxTime!
+      }
+    }
     // increase each value by the real amount of time passed
     // multiplied by the speed value
-    this.setTimeFilter(
-      this.minTimeFilter! + delta * +speedSelect.value,
-      this.maxTimeFilter! + delta * +speedSelect.value,
-    )
-    this.frameId = requestAnimationFrame(this.animate)
-    this.prevTime = t
+    this.setTimeFilter(newMin, newMax)
+
+    if (this.isPlaying) {
+      this.frameId = requestAnimationFrame(this.animate)
+    }
+  }
+
+  cancelAnimation() {
+    window.cancelAnimationFrame(this.frameId)
+    this.prevTime = 0
+    this.isPlaying = false
   }
 }

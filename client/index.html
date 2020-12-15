@@ -39,7 +39,7 @@
       width: 100%;
     }
     #scrubber {
-      bottom: 50px;
+      bottom: 70px;
       box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
       position: absolute;
       height: 75px;
@@ -53,12 +53,13 @@
       fill: #004fa8;
     }
     #bottom-bar {
-      bottom: 0;
+      bottom: 20px;
       display: flex;
       position: absolute;
       width: 100%;
     }
     #bottom-bar select,
+    #bottom-bar input,
     #bottom-bar button:not(:last-child) {
       margin-right: 1rem;
     }
@@ -120,6 +121,7 @@
         <option value="604800">1w:1s</option>
         <option value="2592000">1mo:1s</option>
       </select>
+      <input type="checkbox" name="loop" id="loop">
       <button id="playPause">Play/Pause</button>
     </div>
   </div>
