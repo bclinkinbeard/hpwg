@@ -20,8 +20,17 @@ export default class App {
   playPause!: HTMLElement
   loop!: HTMLInputElement
   timeScrubber = new TimeScrubber('#scrubber')
+  table?: Arrow.Table<any>
+
+  intialLng = 0
+  intialLat = 0
+  deck!: any
 
   constructor() {
+    this.timeScrubber.onTimeFilterChanged = () => {
+      if (!this.deck) return
+      this.deck.setProps({ layers: [this.getScatterplotLayer()] })
+    }
     this.initDOM()
     this.updateMap()
   }
@@ -76,54 +85,81 @@ export default class App {
     return buf
   }
 
+  getIdColumn(column = 'individual_local_identifier') {
+    return this.table!.getColumn(column)
+  }
+
+  getTimestampColumn(column = 'timestamp') {
+    return this.table!.getColumn(column)
+  }
+
+  getLngColumn(column = 'location_long') {
+    return this.table!.getColumn(column)
+  }
+
+  getLatColumn(column = 'location_lat') {
+    return this.table!.getColumn(column)
+  }
+
+  getScatterplotLayer() {
+    const { maxTimeFilter, minTime, minTimeFilter } = this.timeScrubber
+
+    return new ScatterplotLayer({
+      id: 'scatter-plot',
+      data: {
+        length: this.table!.count(),
+      },
+      pickable: true,
+      radiusScale: 10,
+      radiusMinPixels: 2,
+      getPosition: (d: unknown, i: { index: number }) => {
+        return [
+          this.getLngColumn().get(i.index),
+          this.getLatColumn().get(i.index),
+          0,
+        ]
+      },
+      getFillColor: [255, 40, 255],
+      updateTriggers: {
+        getFilterValue: [maxTimeFilter, minTimeFilter],
+      },
+      getFilterValue: (d: unknown, i: { index: number }) => {
+        return this.getTimestampColumn().get(i.index) - minTime!
+      },
+      filterRange: [minTimeFilter! - minTime!, maxTimeFilter! - minTime!],
+      extensions: [new DataFilterExtension({ filterSize: 1 })],
+    })
+  }
+
   updateMap = async () => {
+    this.timeScrubber.reset()
     const buf = await this.fetchData(
       this.animalSelect.value!,
       +this.limitSelect.value!,
     )
-    const table = Arrow.Table.from(buf)
-    const lngs = table.getColumn('location_long')
-    const lats = table.getColumn('location_lat')
-    const lngStats = columnStats(table.getColumn('location_long'))
-    const latStats = columnStats(table.getColumn('location_lat'))
-    const timeStats = columnStats(table.getColumn('timestamp'))
-
+    this.table = Arrow.Table.from(buf)
+    const timeStats = columnStats(this.getTimestampColumn())
     this.timeScrubber.setTimeBounds(timeStats.min, timeStats.max)
+    const lngStats = columnStats(this.getLngColumn())
+    const latStats = columnStats(this.getLatColumn())
+    this.intialLng = (lngStats.min + lngStats.max) / 2
+    this.intialLat = (latStats.min + latStats.max) / 2
 
-    const longitude = (lngStats.min + lngStats.max) / 2
-    const latitude = (latStats.min + latStats.max) / 2
-
-    new DeckGL({
+    this.deck = new DeckGL({
       container: 'map',
       mapStyle: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
       initialViewState: {
-        longitude,
-        latitude,
-        zoom: 8,
+        longitude: this.intialLng,
+        latitude: this.intialLat,
+        zoom: 4,
         maxZoom: 20,
       },
       controller: true,
-      layers: [
-        new ScatterplotLayer({
-          id: 'scatter-plot',
-          data: {
-            length: table.count(),
-          },
-          pickable: true,
-          radiusScale: 10,
-          radiusMinPixels: 2,
-          getPosition: (d: unknown, i: { index: number }) => {
-            return [lngs.get(i.index), lats.get(i.index), 0]
-          },
-          getFillColor: [255, 40, 255],
-        }),
-      ],
+      layers: [this.getScatterplotLayer()],
       getTooltip: (data: { index: number }) => {
         if (data.index < 0) return
-        const name = table
-          .getColumn('individual_local_identifier')
-          .get(data.index)
-        const ts = table.getColumn('timestamp').get(data.index)
+        const name = this.getIdColumn().get(data.index)
+        const ts = this.getTimestampColumn().get(data.index)
         return (
           data.index > -1 && {
             html: `<b>${name}</b><br/>${new Date(ts).toISOString()}`,

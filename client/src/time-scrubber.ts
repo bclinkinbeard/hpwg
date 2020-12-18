@@ -26,6 +26,7 @@ export default class TimeScrubber {
 
   minTimeFilter?: number
   maxTimeFilter?: number
+  onTimeFilterChanged = () => {}
 
   get contextWidth() {
     const { width } = this.hostEl.getBoundingClientRect()
@@ -81,6 +82,11 @@ export default class TimeScrubber {
       .attr('text-anchor', 'end')
   }
 
+  reset() {
+    this.hostEl.removeChild(this.svg.node()!)
+    this.initDOM()
+  }
+
   initBrush() {
     this.brush = d3
       .brushX<{}>()
@@ -90,6 +96,7 @@ export default class TimeScrubber {
       ])
       .handleSize(10)
       .on('start brush end', () => {
+        this.onTimeFilterChanged()
         if (this.isPlaying || !d3.event) return
         switch (d3.event.type) {
           case 'start':
@@ -106,8 +113,8 @@ export default class TimeScrubber {
         const maxFilterDate = this.timeScale!.invert(right)
         this.minTimeFilter = minFilterDate.valueOf()
         this.maxTimeFilter = maxFilterDate.valueOf()
-        this.minTimeLabel.text(minFilterDate.toLocaleString())
-        this.maxTimeLabel.text(maxFilterDate.toLocaleString())
+        this.minTimeLabel.text(minFilterDate.toUTCString())
+        this.maxTimeLabel.text(maxFilterDate.toUTCString())
       })
 
     this.markingsGroup
@@ -132,8 +139,8 @@ export default class TimeScrubber {
   setTimeBounds(minTime: number, maxTime: number) {
     this.minTime = this.minTimeFilter = minTime
     this.maxTime = this.maxTimeFilter = maxTime
-    this.minTimeLabel.text(new Date(this.minTime).toLocaleString())
-    this.maxTimeLabel.text(new Date(this.maxTime).toLocaleString())
+    this.minTimeLabel.text(new Date(this.minTime).toUTCString())
+    this.maxTimeLabel.text(new Date(this.maxTime).toUTCString())
     this.timeScale = d3
       .scaleTime()
       .domain([this.minTime, this.maxTime])
@@ -147,8 +154,9 @@ export default class TimeScrubber {
     const extent = [this.timeScale!(minTime), this.timeScale!(maxTime)]
     // @ts-ignore
     this.markingsGroup.selectAll('.brush').call(this.brush.move, extent)
-    this.minTimeLabel.text(new Date(this.minTimeFilter).toLocaleString())
-    this.maxTimeLabel.text(new Date(this.maxTimeFilter).toLocaleString())
+    this.minTimeLabel.text(new Date(this.minTimeFilter).toUTCString())
+    this.maxTimeLabel.text(new Date(this.maxTimeFilter).toUTCString())
+    this.onTimeFilterChanged()
   }
 
   setDuration(duration: number) {
