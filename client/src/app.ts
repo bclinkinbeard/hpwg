@@ -22,6 +22,8 @@ export default class App {
   timeScrubber = new TimeScrubber('#scrubber')
   table?: Arrow.Table<any>
 
+  data: { length: number } = { length: 0 }
+
   intialLng = 0
   intialLat = 0
   deck!: any
@@ -106,9 +108,7 @@ export default class App {
 
     return new ScatterplotLayer({
       id: 'scatter-plot',
-      data: {
-        length: this.table!.count(),
-      },
+      data: this.data,
       pickable: true,
       radiusScale: 10,
       radiusMinPixels: 2,
@@ -138,6 +138,7 @@ export default class App {
       +this.limitSelect.value!,
     )
     this.table = Arrow.Table.from(buf)
+    this.data = {  length: this.table.length  }
     const timeStats = columnStats(this.getTimestampColumn())
     this.timeScrubber.setTimeBounds(timeStats.min, timeStats.max)
     const lngStats = columnStats(this.getLngColumn())
@@ -151,7 +152,7 @@ export default class App {
       initialViewState: {
         longitude: this.intialLng,
         latitude: this.intialLat,
-        zoom: 4,
+        zoom: 9,
         maxZoom: 20,
       },
       controller: true,
