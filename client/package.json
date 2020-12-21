@@ -25,7 +25,8 @@
     "@deck.gl/layers": "^8.3.11",
     "apache-arrow": "^2.0.0",
     "copy-webpack-plugin": "^6.4.0",
-    "d3": "^5.16.0"
+    "d3": "^5.16.0",
+    "idb-keyval": "^3.2.0"
   },
   "prettier": {
     "semi": false,

@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from google.cloud import bigquery
 
 GCP_PROJECT = "hpwg-297320"
-TESTING = True
+TESTING = False
 lastBuf = None
 
 def arrow_table_to_pybytes(arrow_table):

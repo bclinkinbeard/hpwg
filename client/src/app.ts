@@ -4,6 +4,7 @@
 // const {ScatterplotLayer} = layers
 const { DataFilterExtension, DeckGL, ScatterplotLayer } = (window as any).deck
 import * as Arrow from 'apache-arrow'
+import { get, set } from 'idb-keyval'
 import { $, columnStats, DURATIONS } from './helpers'
 import TimeScrubber from './time-scrubber'
 
@@ -79,12 +80,18 @@ export default class App {
     this.loading.style.display = 'block'
     this.map.textContent = ''
 
-    const xhr = await fetch(`/api/movebank/${animal}/arrow/${+limit}/`)
-    const buf = await xhr.arrayBuffer()
+    const url = `/api/movebank/${animal}/arrow/${+limit}/`
+    let result = await get<ArrayBuffer>(url)
+
+    if (!result) {
+      const xhr = await fetch(url)
+      result = await xhr.arrayBuffer()
+      await set(url, result)
+    }
 
     this.loading.style.display = 'none'
 
-    return buf
+    return result
   }
 
   getIdColumn(column = 'individual_local_identifier') {
