@@ -19,6 +19,7 @@ export default class App {
   limitSelect!: HTMLSelectElement
   loading!: HTMLElement
   map!: HTMLElement
+  deckDiv!: HTMLElement
   playPause!: HTMLElement
   loop!: HTMLInputElement
   timeScrubber = new TimeScrubber('#scrubber')
@@ -47,6 +48,7 @@ export default class App {
     this.limitSelect = $<HTMLSelectElement>('#limit')
     this.loading = $('#loading')
     this.map = $('#map')
+    this.deckDiv = $('#deck')
     this.playPause = $('#playPause')
     this.loop = $<HTMLInputElement>('#loop')
 
@@ -80,6 +82,7 @@ export default class App {
   fetchData = async (animal: string, limit: number) => {
     this.loading.style.display = 'block'
     this.map.textContent = ''
+    this.deckDiv.textContent = ''
 
     const url = `/api/movebank/${animal}/arrow/${+limit}/`
     let result = await get<ArrayBuffer>(url)
@@ -191,7 +194,7 @@ export default class App {
     })
 
     this.deck = new DeckGL({
-      container: 'deck-canvas',
+      container: 'deck',
       mapStyle: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
       initialViewState: {
         longitude: this.intialLng,
