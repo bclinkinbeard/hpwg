@@ -3,6 +3,7 @@
 // const { Deck } = deck
 // const {ScatterplotLayer} = layers
 const { DataFilterExtension, DeckGL, ScatterplotLayer } = (window as any).deck
+import mapboxgl from 'mapbox-gl'
 import * as Arrow from 'apache-arrow'
 import { get, set } from 'idb-keyval'
 import { $, columnStats, DURATIONS } from './helpers'
@@ -118,7 +119,7 @@ export default class App {
       data: this.data,
       pickable: true,
       radiusScale: 10,
-      radiusMinPixels: 2,
+      radiusMinPixels: 4,
       getPosition: (d: unknown, i: { index: number }) => {
         return [
           this.getLngColumn().get(i.index),
@@ -145,7 +146,7 @@ export default class App {
       +this.limitSelect.value!,
     )
     this.table = Arrow.Table.from(buf)
-    this.data = {  length: this.table.length  }
+    this.data = { length: this.table.length }
     const timeStats = columnStats(this.getTimestampColumn())
     this.timeScrubber.setTimeBounds(timeStats.min, timeStats.max)
     const lngStats = columnStats(this.getLngColumn())
@@ -153,16 +154,64 @@ export default class App {
     this.intialLng = (lngStats.min + lngStats.max) / 2
     this.intialLat = (latStats.min + latStats.max) / 2
 
-    this.deck = new DeckGL({
+    mapboxgl.accessToken =
+      'pk.eyJ1IjoiYmNsaW5raW5iZWFyZCIsImEiOiJjanpmejExaTcwZ2J6M2xyc3p4dDB6OXAxIn0.9PNiWgcKMpB9uzT62Yd_Cg'
+    const map = new mapboxgl.Map({
       container: 'map',
+      style: 'mapbox://styles/mapbox/satellite-v9',
+      interactive: true,
+      center: [this.intialLng, this.intialLat],
+      zoom: 9,
+      bearing: 0,
+      pitch: 80,
+    })
+
+    map.on('load', function () {
+      map.addSource('mapbox-dem', {
+        type: 'raster-dem',
+        url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+        tileSize: 512,
+        maxzoom: 17,
+      })
+      // add the DEM source as a terrain layer with exaggerated height
+      map.setTerrain({ source: 'mapbox-dem', exaggeration: 2.5 })
+
+      // add a sky layer that will show when the map is highly pitched
+      map.addLayer({
+        id: 'sky',
+        // @ts-ignore
+        type: 'sky',
+        paint: {
+          // @ts-ignore
+          'sky-type': 'atmosphere',
+          'sky-atmosphere-sun': [0.0, 0.0],
+          'sky-atmosphere-sun-intensity': 15,
+        },
+      })
+    })
+
+    this.deck = new DeckGL({
+      container: 'deck-canvas',
       mapStyle: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
       initialViewState: {
         longitude: this.intialLng,
         latitude: this.intialLat,
         zoom: 9,
         maxZoom: 20,
+        bearing: 0,
+        pitch: 80,
+        maxPitch: 85,
       },
       controller: true,
+      onViewStateChange: (o: { viewState: { [index: string]: any } }) => {
+        const { viewState } = o
+        map.jumpTo({
+          center: [viewState.longitude, viewState.latitude],
+          zoom: viewState.zoom,
+          bearing: viewState.bearing,
+          pitch: viewState.pitch,
+        })
+      },
       layers: [this.getScatterplotLayer()],
       getTooltip: (data: { index: number }) => {
         if (data.index < 0) return
